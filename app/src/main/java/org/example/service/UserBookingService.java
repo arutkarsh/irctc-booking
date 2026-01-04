@@ -27,7 +27,7 @@ public class UserBookingService {
     private final List<Ticket> bookedTickets = new ArrayList<>();
 
 
-    private static final String USERS_PATH = System.getProperty("user.dir") + "/app/src/main/java/org/example/localDb/users.json";
+    private static final String USERS_PATH = "app/src/main/java/org/example/localDb/users.json";
 
     public UserBookingService() throws IOException
     {
@@ -76,6 +76,10 @@ public class UserBookingService {
     }
     public void fetchBooking()
     {
+        if (user == null) {
+            System.out.println("No user is logged in. Please login to fetch bookings.");
+            return;
+        }
         user.printTickets();
     }
     

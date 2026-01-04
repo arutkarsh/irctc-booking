@@ -24,7 +24,7 @@ public class TrainService {
             return catchedTrains;
     
     try{
-        String trainsPath = System.getProperty("user.dir") + "/app/src/main/java/org/example/localDb/trains.json";
+        String trainsPath = "app/src/main/java/org/example/localDb/trains.json";
         File trainsFile = new File(trainsPath);
         catchedTrains=objectMapper.readValue(trainsFile, objectMapper.getTypeFactory().constructCollectionType(List.class, Train.class));
     }
