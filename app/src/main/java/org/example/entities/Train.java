@@ -15,7 +15,7 @@ public class Train {
     private String trainId;
 
     @JsonProperty("train_no")
-    private String trainNo;
+    private Integer trainNo;
 
     private List<List<Integer>> seats;
 
@@ -26,7 +26,7 @@ public class Train {
 
     public Train(){}
 
-    public Train(String trainId, String trainNo, List<List<Integer>> seats, Map<String, String> stationTimes, List<String> stations){
+    public Train(String trainId, Integer trainNo, List<List<Integer>> seats, Map<String, String> stationTimes, List<String> stations){
         this.trainId = trainId;
         this.trainNo = trainNo;
         this.seats = seats;
@@ -54,11 +54,11 @@ public class Train {
         return stationTimes;
     }
 
-    public String getTrainNo(){
+    public Integer getTrainNo(){
         return trainNo;
     }
 
-    public void setTrainNo(String trainNo){
+    public void setTrainNo(Integer trainNo){
         this.trainNo = trainNo;
     }
 
@@ -75,7 +75,7 @@ public class Train {
     }
 
     public String getTrainInfo(){
-        return String.format("Train ID: %s Train No: %s", trainId, trainNo);
+        return String.format("Train ID: %s Train No: %d", trainId, trainNo);
     }
 
 }

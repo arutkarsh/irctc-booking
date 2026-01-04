@@ -47,3 +47,13 @@ task(runInteractiveTest, type: JavaExec) {
     mainClass = 'org.example.InteractiveTest'
     classpath = sourceSets.main.runtimeClasspath
 }
+
+task(runSimpleTest, type: JavaExec) {
+    mainClass = 'org.example.SimpleTest'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task(runAutoTest, type: JavaExec) {
+    mainClass = 'org.example.AutoTest'
+    classpath = sourceSets.main.runtimeClasspath
+}

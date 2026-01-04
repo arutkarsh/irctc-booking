@@ -14,6 +14,7 @@ import java.io.IOException;
 import org.example.service.UserBookingService;
 import org.example.entities.User;
 import org.example.entities.Train;
+import org.example.entities.Ticket;
 import org.example.util.UserServiceUtil;
 
 public class App {
@@ -34,12 +35,32 @@ public class App {
             return;
 
         }
-while(option !=7)
+        
+        while(option !=7)
         {
+            System.out.println("\n=== Train Booking System Menu ===");
+            System.out.println("1. Sign Up");
+            System.out.println("2. Login");
+            System.out.println("3. Fetch Bookings");
+            System.out.println("4. Search Trains");
+            System.out.println("5. Book Ticket");
+            System.out.println("6. Cancel Booking");
+            System.out.println("7. Exit");
             System.out.print("Enter your choice: ");
-            if (sc.hasNextInt()) {
-                option = sc.nextInt();
-                sc.nextLine(); // Consume newline
+            
+            if (sc.hasNextLine()) {
+                try {
+                    String input = sc.nextLine().trim();
+                    if (input.isEmpty()) {
+                        System.out.println("Please enter a valid option.");
+                        continue;
+                    }
+                    option = Integer.parseInt(input);
+                } catch (Exception e) {
+                    System.out.println("Invalid input. Please enter a number.");
+                    option = 0;
+                    continue;
+                }
             } else {
                 System.out.println("No input available. Exiting...");
                 break;
@@ -49,23 +70,42 @@ while(option !=7)
             {
                 case 1:
                     System.out.println("Enter the username to signup");
-                    String nameToSignUp=sc.next();
+                    String nameToSignUp = sc.hasNextLine() ? sc.nextLine().trim() : "";
                     System.out.println("Enter the password to signup");
-                    String passwordToSignUp=sc.next();
-                    User userToSignUp=new User(nameToSignUp,passwordToSignUp,UserServiceUtil.hashPassword(passwordToSignUp),new ArrayList<>(),UUID.randomUUID().toString());
-                    userBookingService.signUp(userToSignUp);
+                    String passwordToSignUp = sc.hasNextLine() ? sc.nextLine().trim() : "";
+                    if (!nameToSignUp.isEmpty() && !passwordToSignUp.isEmpty()) {
+                        User userToSignUp = new User(nameToSignUp, passwordToSignUp, UserServiceUtil.hashPassword(passwordToSignUp), new ArrayList<>(), UUID.randomUUID().toString());
+                        boolean signUpSuccess = userBookingService.signUp(userToSignUp);
+                        if(signUpSuccess) {
+                            System.out.println("Signup successful! Please login to continue.");
+                        } else {
+                            System.out.println("Signup failed. Please try again.");
+                        }
+                    } else {
+                        System.out.println("Username and password cannot be empty.");
+                    }
                     break;
 
                 case 2:
                     System.out.println("Enter the username to Login");
-                    String nameToLogin = sc.next();
-                    System.out.println("Enter the password to signup");
-                    String passwordToLogin = sc.next();
-                    User userToLogin = new User(nameToLogin, passwordToLogin, UserServiceUtil.hashPassword(passwordToLogin), new ArrayList<>(), UUID.randomUUID().toString());
-                    try{
-                        userBookingService = new UserBookingService(userToLogin);
-                    }catch (IOException ex){
-                        return;
+                    String nameToLogin = sc.hasNextLine() ? sc.nextLine().trim() : "";
+                    System.out.println("Enter the password to login");
+                    String passwordToLogin = sc.hasNextLine() ? sc.nextLine().trim() : "";
+                    if (!nameToLogin.isEmpty() && !passwordToLogin.isEmpty()) {
+                        User userToLogin = new User(nameToLogin, passwordToLogin, UserServiceUtil.hashPassword(passwordToLogin), new ArrayList<>(), UUID.randomUUID().toString());
+                        try{
+                            UserBookingService tempService = new UserBookingService(userToLogin);
+                            if(tempService.loginUser()) {
+                                userBookingService = tempService;
+                                System.out.println("Login successful!");
+                            } else {
+                                System.out.println("Login failed. Invalid username or password.");
+                            }
+                        }catch (IOException ex){
+                            System.out.println("Error during login: " + ex.getMessage());
+                        }
+                    } else {
+                        System.out.println("Username and password cannot be empty.");
                     }
                     break;
                 case 3:
@@ -74,26 +114,77 @@ while(option !=7)
                     break;
                 case 4:
                     System.out.println("Enter your source station name");
-                    String source=sc.next();
+                    String source = sc.hasNextLine() ? sc.nextLine().trim() : "";
                     System.out.println("Enter your destination name");
-                    String destination=sc.next();
+                    String destination = sc.hasNextLine() ? sc.nextLine().trim() : "";
 
-                    try {
-                        List<Train> trains=userBookingService.getTrains(source,destination);
-                        int index=1;
-                        for(Train t : trains)
-                        {
-                            System.out.println(index+" TrainId: "+t.getTrainId());
-                            System.out.println("Train Info: " + t.getTrainInfo());
-                            index++;
+                    if (!source.isEmpty() && !destination.isEmpty()) {
+                        try {
+                            List<Train> trains = userBookingService.getTrains(source, destination);
+                            int index = 1;
+                            for(Train t : trains)
+                            {
+                                System.out.println(index+" TrainId: "+t.getTrainId());
+                                System.out.println("Train Info: " + t.getTrainInfo());
+                                index++;
+                            }
+                            if(trains.isEmpty()) {
+                                System.out.println("No trains found for this route.");
+                            }
+                        } catch (IOException e) {
+                            System.out.println("Error searching trains: " + e.getMessage());
                         }
-                    } catch (IOException e) {
-                        System.out.println("Error searching trains: " + e.getMessage());
+                    } else {
+                        System.out.println("Source and destination cannot be empty.");
                     }
-                break;
+                    break;
                 
+                case 5:
+                    System.out.println("Enter train ID:");
+                    String trainId = sc.hasNextLine() ? sc.nextLine().trim() : "";
+                    System.out.println("Enter source station:");
+                    String bookSource = sc.hasNextLine() ? sc.nextLine().trim() : "";
+                    System.out.println("Enter destination station:");
+                    String bookDestination = sc.hasNextLine() ? sc.nextLine().trim() : "";
+                    System.out.println("Enter number of seats:");
+                    String seatsStr = sc.hasNextLine() ? sc.nextLine().trim() : "";
+                    
+                    if (!trainId.isEmpty() && !bookSource.isEmpty() && !bookDestination.isEmpty() && !seatsStr.isEmpty()) {
+                        try {
+                            int seatsRequired = Integer.parseInt(seatsStr);
+                            
+                            Ticket bookedTicket = userBookingService.bookTicket(trainId, bookSource, bookDestination, seatsRequired);
+                            
+                            // Add ticket to user's bookings
+                            userBookingService.addTicketToUser(bookedTicket);
+                            
+                            System.out.println("Ticket booked successfully!");
+                            System.out.println("Ticket ID: " + bookedTicket.getTicketId());
+                            System.out.println("From: " + bookedTicket.getSource() + " To: " + bookedTicket.getDestination());
+                            System.out.println("Seats: " + seatsRequired);
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid number of seats. Please enter a valid number.");
+                        } catch (Exception e) {
+                            System.out.println("Booking failed: " + e.getMessage());
+                        }
+                    } else {
+                        System.out.println("All fields are required for booking.");
+                    }
+                    break;
+                case 6:
+                    System.out.println("Enter ticket ID to cancel:");
+                    String ticketId = sc.hasNextLine() ? sc.nextLine().trim() : "";
+                    if (!ticketId.isEmpty()) {
+                        userBookingService.cancelBooking(ticketId);
+                    } else {
+                        System.out.println("Ticket ID cannot be empty.");
+                    }
+                    break;
+                case 7:
+                    System.out.println("Thank you for using Train Booking System. Goodbye!");
+                    break;
                 default:
-                    System.out.println("Invalid option");
+                    System.out.println("Invalid option. Please try again.");
                     break;
             }
 
